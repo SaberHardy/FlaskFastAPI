@@ -1,70 +1,40 @@
-from distutils.log import debug
-import pandas as pd
-
-from fileinput import filename
-import pandas as pd
-from flask import *
 import os
-from werkzeug.utils import secure_filename
-
-UPLOAD_FOLDER = os.path.join('staticFiles', 'uploads')
-
-# Define allowed files
-ALLOWED_EXTENSIONS = {'csv'}
+import csv
+from flask import Flask, render_template, request, redirect, url_for, jsonify, json
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'uploads'
 
-# Configure upload file path flask
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-app.secret_key = 'This is your secret key to utilize session in Flask'
-
-
-@app.route('/', methods=['GET', 'POST'])
-def uploadFile():
-    if request.method == 'POST':
-        # upload file flask
-        f = request.files.get('file')
-
-        # Extracting uploaded file name
-        data_filename = secure_filename(f.filename)
-
-        f.save(os.path.join(app.config['UPLOAD_FOLDER'],
-                            data_filename))
-
-        session['uploaded_data_file_path'] = os.path.join(app.config['UPLOAD_FOLDER'], data_filename)
-
-        return render_template('index2.html')
-    return render_template("index.html")
+# Ensure the uploads directory exists
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
 
 
-@app.route('/show_data')
-def showData():
-    # Uploaded File Path
-    data_file_path = session.get('uploaded_data_file_path', None)
-    # read csv
-    uploaded_df = pd.read_csv(data_file_path,
-                              encoding='unicode_escape')
-    # Converting to html Table
-    uploaded_df_html = uploaded_df.to_html()
-    return render_template('show_csv_data.html',
-                           data_var=uploaded_df_html)
+@app.route('/')
+def index():
+    return render_template('upload.html')
 
 
-@app.route('/get_csv_data/<filename>', methods=['GET'])
-def get_csv_data(filename):
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+@app.route('/upload', methods=['POST'])
+def upload():
+    file = request.files['file']
+    if file and file.filename.endswith('.csv'):
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+        return redirect(url_for('display_api', filename=file.filename))
+    else:
+        return "Please upload a valid CSV file."
 
-    if not os.path.exists(file_path):
-        return jsonify({'error': 'File not found'}), 404
 
-    # Read the CSV file using Pandas
-    data = pd.read_csv(file_path)
+@app.route('/display_api/<filename>')
+def display_api(filename):
+    api_data = []
+    with open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'r') as csvfile:
+        csv_reader = csv.DictReader(csvfile)
+        for row in csv_reader:
+            api_data.append(dict(row))
 
-    # Convert the CSV data to JSON
-    json_data = data.to_json(orient='records')
-
-    return {'data': json_data}, 200
+    # Pass the data to the template
+    return render_template('display_api.html', data=api_data)
 
 
 if __name__ == '__main__':
