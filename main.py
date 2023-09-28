@@ -24,11 +24,10 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 #     else:
 #         return "Please upload a valid CSV file."
 
-
 @app.route('/', methods=['POST', 'GET'])
 def display_api():
     api_data = []
-    with open("staticfiles/uploads/homes.csv", 'r') as csvfile:
+    with open('staticfiles/uploads/homes.csv', 'r') as csvfile:
         # next(csv)
         csv_reader = csv.DictReader(csvfile)
         for row in csv_reader:
