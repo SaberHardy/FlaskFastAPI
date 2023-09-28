@@ -3,7 +3,7 @@ import csv
 from flask import Flask, render_template, request, redirect, url_for, jsonify, json
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['UPLOAD_FOLDER'] = 'staticfiles/uploads'
 
 # Ensure the uploads directory exists
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
