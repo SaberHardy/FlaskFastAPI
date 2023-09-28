@@ -34,7 +34,7 @@ def display_api():
             api_data.append(dict(row))
 
     # Pass the data to the template
-    return render_template('display_api.html', data=api_data)
+    return jsonify(api_data)
 
 
 if __name__ == '__main__':
