@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Data</title>
+</head>
+<body>
+
+<h1>API Data</h1>
+
+<div id="data"></div>
+
+<script>
+    const apiUrl = '/';
+
+    function fetchData() {
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                const newData = data.map(item => JSON.stringify(item)).join('<br>');
+                document.getElementById('data').innerHTML = `${newData}`;
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    }
+
+    fetchData();
+    setInterval(fetchData, 5000);
+</script>
+
+</body>
+</html>
