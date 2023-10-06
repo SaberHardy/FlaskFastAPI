@@ -6,7 +6,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'staticfiles/uploads'
-app.config['BATCH_SIZE'] = 3
+app.config['BATCH_SIZE'] = 50
 
 # Ensure the uploads directory exists
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
@@ -19,7 +19,7 @@ total_rows = 0  # Total number of rows in the CSV
 
 
 def is_csv_empty():
-    with open('staticfiles/uploads/homes.csv', 'r') as csvfile:
+    with open('fraudDataCopy.csv', 'r') as csvfile:
         csv_reader = csv.reader(csvfile)
         return not any(csv_reader)  # Check if there are any rows
 
@@ -31,7 +31,7 @@ def load_csv_data():
     if is_csv_empty():
         return  # If CSV is empty, don't load any data
 
-    with open('staticfiles/uploads/homes.csv', 'r') as csvfile:
+    with open('fraudDataCopy.csv', 'r') as csvfile:
         csv_reader = csv.DictReader(csvfile)
         rows = list(csv_reader)
         total_rows = len(rows)
@@ -39,6 +39,7 @@ def load_csv_data():
         start_idx = batch_index * app.config['BATCH_SIZE']
         end_idx = start_idx + app.config['BATCH_SIZE']
         current_batch = [dict(row) for row in rows[start_idx:end_idx]]
+        current_batch.append(rows)
         batch_index += 1
 
         # Check if all data has been served, if so, stop the scheduler
@@ -84,8 +85,7 @@ def get_data():
     response = app.response_class(
         response=pretty_json_data,
         status=200,
-        mimetype='application/json'
-    )
+        mimetype='application/json')
     return response
 
 
