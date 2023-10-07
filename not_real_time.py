@@ -1,41 +1,25 @@
-import os
-import csv
-from flask import Flask, render_template, request, redirect, url_for, jsonify, json
+import time
+import pandas as pd
+from flask import Flask, jsonify
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'staticfiles/uploads'
 
-# Ensure the uploads directory exists
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
-
-
-# @app.route('/')
-# def index():
-#     return render_template('upload.html')
+# Load the initial data from the CSV file
+data = pd.read_csv('staticfiles/uploads/homes.csv')
+batch_size = 10  # Adjust the batch size as needed
 
 
-# @app.route('/upload', methods=['POST'])
-# def upload():
-#     file = request.files['file']
-#     if file and file.filename.endswith('.csv'):
-#         file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-#         return redirect(url_for('display_api', filename=file.filename))
-#     else:
-#         return "Please upload a valid CSV file."
-
-@app.route('/file-api/data', methods=['POST', 'GET'])
-def display_api():
-    api_data = []
-    with open('FraudAnalysis.csv', 'r') as csvfile:
-        # next(csv)
-        csv_reader = csv.DictReader(csvfile)
-        for row in csv_reader:
-            api_data.append(dict(row))
-
-    # Pass the data to the template
-    return jsonify(api_data)
+@app.route('/file-api/data', methods=['GET'])
+def get_data():
+    global data
+    current_data = data.head(batch_size).to_dict(orient='records')
+    data = data[batch_size:]  # Move to the next batch
+    if data.empty:
+        # Reload the data from the CSV file when the end is reached
+        data = pd.read_csv('staticfiles/uploads/homes.csv')
+    return jsonify(current_data)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Update the data every 3 seconds
+    app.run(host='0.0.0.0', debug=True)
