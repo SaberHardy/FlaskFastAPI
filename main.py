@@ -31,7 +31,7 @@ def load_csv_data():
     if is_csv_empty():
         return  # If CSV is empty, don't load any data
 
-    with open('FraudAnalysis.csv', 'r') as csvfile:
+    with open('data/FraudAnalysis.csv', 'r') as csvfile:
         csv_reader = csv.DictReader(csvfile)
         rows = list(csv_reader)
         total_rows = len(rows)

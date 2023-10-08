@@ -1,11 +1,10 @@
-import time
-import pandas as pd
 from flask import Flask, jsonify
+import pandas as pd
 
 app = Flask(__name__)
 
 # Load the initial data from the CSV file
-data = pd.read_csv('staticfiles/uploads/homes.csv')
+data = pd.read_csv('data/FraudAnalysis.csv')
 batch_size = 10  # Adjust the batch size as needed
 
 
@@ -16,10 +15,10 @@ def get_data():
     data = data[batch_size:]  # Move to the next batch
     if data.empty:
         # Reload the data from the CSV file when the end is reached
-        data = pd.read_csv('staticfiles/uploads/homes.csv')
-    return jsonify(current_data)
+        data = pd.read_csv('data/FraudAnalysis.csv')
+    return jsonify(current_data), 200
 
 
 if __name__ == '__main__':
     # Update the data every 3 seconds
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)
