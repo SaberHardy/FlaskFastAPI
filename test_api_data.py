@@ -19,15 +19,22 @@ def test_get_data(client):
 
     # Parse the JSON response
     data = json.loads(response.get_data(as_text=True))
-
+    # print(f"the data is {data[0]['amount']}")
     # Check the structure of the JSON response
     assert isinstance(data, list)
     # Do the assert according to what you have in the json return file
     for item in data:
-        assert 'age' in item
-        assert 'city' in item
-        assert 'dollar' in item
-        assert 'firstname' in item
+        assert 'amount' in item
+        assert 'type' in item
+        assert 'amount' in item
+        assert 'nameDest' in item
+        assert 'oldbalanceOrg' in item
+        assert 'newbalanceOrig' in item
+        assert 'nameDest' in item
+        assert 'oldbalanceDest' in item
+        assert 'newbalanceDest' in item
+        assert 'isFraud' in item
+        assert 'isFlaggedFraud' in item
 
 
 if __name__ == '__main__':
