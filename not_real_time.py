@@ -4,7 +4,7 @@ import pandas as pd
 app = Flask(__name__)
 
 # Load the initial data from the CSV file
-data = pd.read_csv('data/FraudAnalysis.csv')
+data = pd.read_csv('data/Fraud500.csv')
 batch_size = 10  # Adjust the batch size as needed
 
 
@@ -12,10 +12,11 @@ batch_size = 10  # Adjust the batch size as needed
 def get_data():
     global data
     current_data = data.head(batch_size).to_dict(orient='records')
+
     data = data[batch_size:]  # Move to the next batch
     if data.empty:
         # Reload the data from the CSV file when the end is reached
-        data = pd.read_csv('data/FraudAnalysis.csv')
+        data = pd.read_csv('data/Fraud500.csv')
     return jsonify(current_data), 200
 
 

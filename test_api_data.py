@@ -13,6 +13,7 @@ def client():
 def test_get_data(client):
     # Send a GET request to the /file-api/data endpoint
     response = client.get('/file-api/data')
+    # print(f'data contain {response.data}')
 
     # Check that the response status code is 200 (OK)
     assert response.status_code == 200
@@ -24,15 +25,12 @@ def test_get_data(client):
     assert isinstance(data, list)
     # Do the assert according to what you have in the json return file
     for item in data:
+        assert 'id' in item
         assert 'amount' in item
         assert 'type' in item
-        assert 'amount' in item
-        assert 'nameDest' in item
         assert 'oldbalanceOrg' in item
         assert 'newbalanceOrig' in item
         assert 'nameDest' in item
-        assert 'oldbalanceDest' in item
-        assert 'newbalanceDest' in item
         assert 'isFraud' in item
         assert 'isFlaggedFraud' in item
 

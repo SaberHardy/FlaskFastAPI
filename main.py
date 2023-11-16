@@ -5,12 +5,13 @@ from flask import Flask, jsonify, render_template
 from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'staticfiles/uploads'
+
+# app.config['UPLOAD_FOLDER'] = 'staticfiles/uploads'
 app.config['BATCH_SIZE'] = 5
 
 # Ensure the uploads directory exists
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
+# if not os.path.exists(app.config['UPLOAD_FOLDER']):
+#     os.makedirs(app.config['UPLOAD_FOLDER'])
 
 # Global variables to hold the current batch of data and metadata
 current_batch = []
@@ -31,7 +32,7 @@ def load_csv_data():
     if is_csv_empty():
         return  # If CSV is empty, don't load any data
 
-    with open('data/FraudAnalysis.csv', 'r') as csvfile:
+    with open('data/fraudDataCopy.csv', 'r') as csvfile:
         csv_reader = csv.DictReader(csvfile)
         rows = list(csv_reader)
         total_rows = len(rows)
@@ -61,41 +62,34 @@ def reload_data():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=reload_data, trigger='interval', seconds=5)
+scheduler.add_job(func=reload_data, trigger='interval', seconds=2)
 scheduler.start()
 
 
 @app.route('/api/data', methods=['GET'])
 def render_html():
     global current_batch
-
     # Assuming current_batch is a list of dictionaries containing the data
-    return render_template('index.html', json_data=current_batch)
+    return render_template('index.html', json_new_data=current_batch)
 
 
-# ...
-
-@app.route('/', methods=['GET'])
-def get_data():
-    global current_batch, total_rows
-
-    if len(current_batch) == 0:
-        if batch_index * app.config['BATCH_SIZE'] >= total_rows:
-            return jsonify(message='All data has been served.')
-
-    formatted_json_data = '\n'.join([f'    "{key}": {json.dumps(value)}' for key, value in current_batch[0].items()])
-    pretty_json_data = '{\n' + formatted_json_data + '\n}'
-
-
-    # Return the pretty-printed JSON response
-    response = app.response_class(
-        response=pretty_json_data,
-        status=200,
-        mimetype='application/json')
-    return response
-
-
-# ...
+# @app.route('/', methods=['GET'])
+# def get_data():
+#     global current_batch, total_rows
+#
+#     if len(current_batch) == 0:
+#         if batch_index * app.config['BATCH_SIZE'] >= total_rows:
+#             return jsonify(message='All data has been served.')
+#
+#     formatted_json_data = '\n'.join([f'      "{key}": {json.dumps(value)}' for key, value in current_batch[0].items()])
+#     pretty_json_data = '{\n' + formatted_json_data + '\n}'
+#
+#     # Return the pretty-printed JSON response
+#     response = app.response_class(
+#         response=pretty_json_data,
+#         status=200,
+#         mimetype='application/json')
+#     return response
 
 
 if __name__ == '__main__':
